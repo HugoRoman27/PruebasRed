@@ -1,0 +1,52 @@
+import subprocess
+import time
+import re
+from datetime import datetime
+
+TARGETS = {
+    "Internet": "8.8.8.8",
+    "Router": "192.168.0.1",   # cambiar
+    "VPN": "10.0.0.1"          # ver si aplica direccion de vpn
+}
+
+LOG_FILE = "network_metrics_log.txt"
+
+def parse_ping(output):
+    # Extraer pérdida de paquetes
+    packet_loss = re.search(r"(\d+)% packet loss", output)
+    packet_loss = int(packet_loss.group(1)) if packet_loss else None
+
+    # Extraer latencia promedio
+    avg_latency = re.search(r"= [\d\.]+/([\d\.]+)/", output)
+    avg_latency = float(avg_latency.group(1)) if avg_latency else None
+
+    return packet_loss, avg_latency
+
+def ping(host):
+    try:
+        result = subprocess.run(
+            ["ping", "-c", "4", host],
+            capture_output=True,
+            text=True
+        )
+        return result.stdout
+    except Exception as e:
+        return str(e)
+
+def log(message):
+    with open(LOG_FILE, "a") as f:
+        f.write(message + "\n")
+
+while True:
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    log(f"\n==== {timestamp} ====")
+
+    for name, ip in TARGETS.items():
+        output = ping(ip)
+        packet_loss, avg_latency = parse_ping(output)
+
+        log(f"{name} ({ip})")
+        log(f"  Latencia promedio: {avg_latency} ms" if avg_latency else "  Latencia: error")
+        log(f"  Pérdida de paquetes: {packet_loss}%" if packet_loss is not None else "  Pérdida: error")
+
+    time.sleep(60)
