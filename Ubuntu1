@@ -4,8 +4,8 @@ from datetime import datetime
 
 TARGETS = {
     "Internet": "8.8.8.8",
-    "Router": "192.168.0.1",   # cambia por tu gateway real
-    "VPN": "10.0.0.1"          # cambia si conoces la IP de la VPN
+    "Router": "192.168.0.1",   # cambiar direccion
+    "VPN": "10.0.0.1"          # colocar por la direccion de la vpn
 }
 
 LOG_FILE = "network_log.txt"
